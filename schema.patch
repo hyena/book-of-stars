@@ -1,0 +1,18 @@
+diff --git a/src/schema.rs b/src/schema.rs
+index f9bfde6..3065702 100644
+--- a/src/schema.rs
++++ b/src/schema.rs
+@@ -1,10 +1,10 @@
+ table! {
+     quoths (id) {
+-        id -> Integer,
+-        author -> Nullable<Integer>,
+-        starred_by -> Nullable<Integer>,
++        id -> BigInt,
++        author -> Nullable<BigInt>,
++        starred_by -> Nullable<BigInt>,
+         content -> Text,
+         legacy -> Bool,
+         legacy_author_fallback -> Nullable<Text>,
+     }
+ }

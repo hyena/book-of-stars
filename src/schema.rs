@@ -1,8 +1,8 @@
 table! {
     quoths (id) {
-        id -> Integer,
-        author -> Nullable<Integer>,
-        starred_by -> Nullable<Integer>,
+        id -> BigInt,
+        author -> Nullable<BigInt>,
+        starred_by -> Nullable<BigInt>,
         content -> Text,
         legacy -> Bool,
         legacy_author_fallback -> Nullable<Text>,
