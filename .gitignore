@@ -1,0 +1,6 @@
+/target
+Cargo.lock
+quoths.sql
+
+# Don't save environment to keep passwords secure
+.env
