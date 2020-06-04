@@ -2,6 +2,7 @@
 Cargo.lock
 quoths.sql
 quotes.json
+slack-spychat-members.csv
 
 # Don't save environment to keep passwords secure
 .env

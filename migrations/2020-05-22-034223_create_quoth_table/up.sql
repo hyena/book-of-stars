@@ -1,8 +1,8 @@
 CREATE TABLE quoths (
-    id INTEGER PRIMARY KEY,
+    id INTEGER NOT NULL PRIMARY KEY,
     author INTEGER,
     starred_by INTEGER,
-    legacy_author TEXT,
     content TEXT NOT NULL,
-    legacy BOOLEAN NOT NULL DEFAULT 'f'
+    legacy BOOLEAN NOT NULL DEFAULT 'f',
+    legacy_author_fallback TEXT
 )
