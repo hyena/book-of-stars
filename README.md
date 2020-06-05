@@ -12,8 +12,16 @@ A discord bot to save quotes from your favorite servers and play them back.
 
 The star emoji is a constant in the src file and can be changed.
 
-## Known Issues
+### Known Issues
   * Currently the bot only works with one server at a time. The data model needs tweaking to support more.
 
-## History
+### TODO
+  - [x] Write a basic data model
+  - [x] Write code to add quoths and query them
+  - [ ] Write bot to record quoths
+  - [ ] Add bot functionality to query and return quoths
+  - [ ] Write utility to load legacy quoths from slack
+  - [ ] Write utility to retrieve pinned messages as quoths
+
+### History
 This bot is a re-implementation of my original `quoth` bot for slack. That was implemented in Go and used Mongo (ick) for storage. Now we use Rust, a relational database, and connect to Discord. The world is better.
