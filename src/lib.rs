@@ -10,14 +10,16 @@ extern crate matches;
 pub mod models;
 pub mod schema;
 
-use self::models::*;
 use diesel::prelude::*;
 #[cfg(test)]
-use diesel::result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError};
+use diesel::result::{DatabaseErrorKind::UniqueViolation, Error::NotFound, Error::DatabaseError};
 use diesel::sql_types;
 use diesel::sqlite::SqliteConnection;
 use dotenv::dotenv;
 use std::env;
+
+use self::models::*;
+use schema::quoths;
 
 no_arg_sql_function!(
     RANDOM,
@@ -41,8 +43,6 @@ pub fn add_quoth<'a>(
     message_id: i64,
     content: &'a str,
 ) -> QueryResult<usize> {
-    use schema::quoths;
-
     let new_quoth = NewQuoth {
         author,
         guild,
@@ -57,8 +57,6 @@ pub fn add_quoth<'a>(
 }
 
 pub fn random_quoth(conn: &SqliteConnection, author: Option<i64>) -> QueryResult<Quoth> {
-    use schema::quoths;
-
     match author {
         Some(id) => quoths::table
             .filter(quoths::author.eq(id))
@@ -66,6 +64,10 @@ pub fn random_quoth(conn: &SqliteConnection, author: Option<i64>) -> QueryResult
             .first::<Quoth>(conn),
         None => quoths::table.order(RANDOM).first::<Quoth>(conn),
     }
+}
+
+pub fn delete_quoth(conn: &SqliteConnection, id: i64) -> QueryResult<usize> {
+    diesel::delete(quoths::table.filter(quoths::id.eq(id))).execute(conn)
 }
 
 #[cfg(test)]
@@ -126,5 +128,27 @@ mod tests {
             add_quoth(&conn, 2, 1, 2, 1, "seize the yeens"),
             Err(DatabaseError(UniqueViolation, _))
         );
+    }
+
+    #[test]
+    fn test_delete_empty() {
+        let conn = memory_database_connection();
+        assert_eq!(delete_quoth(&conn, 1).unwrap(), 0);
+    }
+
+    #[test]
+    fn test_deletes() {
+        let conn = memory_database_connection();
+        add_quoth(&conn, 1, 1, 2, 1, "smells like yeen spirit");
+        add_quoth(&conn, 2, 1, 1, 2, "seize the yeens of production");
+
+        delete_quoth(&conn, 1);
+        let quoth_2 = random_quoth(&conn, Some(2)).unwrap();
+        assert_eq!(quoth_2.author, Some(2));
+        assert_eq!(quoth_2.content, "seize the yeens of production");
+        assert_matches!(random_quoth(&conn, Some(1)), Err(NotFound));
+
+        delete_quoth(&conn, 2);
+        assert_matches!(random_quoth(&conn, Some(2)), Err(NotFound));
     }
 }
