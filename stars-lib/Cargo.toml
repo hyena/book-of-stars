@@ -1,0 +1,14 @@
+[package]
+name = "star_lib"
+version = "0.1.0"
+authors = ["hyena <hyena@users.noreply.github.com>"]
+edition = "2018"
+
+
+[dependencies]
+diesel = { version = "1.4.4", features = ["sqlite"] }
+dotenv = "0.15.0"
+
+[dev-dependencies]
+diesel_migrations = { version = "1.4.0" }
+matches = "0.1.8"

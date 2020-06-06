@@ -77,7 +77,7 @@ mod tests {
     use diesel_migrations::embed_migrations;
     use matches::assert_matches;
 
-    embed_migrations!("migrations");
+    embed_migrations!("../migrations");
 
     fn memory_database_connection() -> SqliteConnection {
         let conn = SqliteConnection::establish(":memory:").unwrap();
