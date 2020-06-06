@@ -5,7 +5,6 @@ extern crate diesel;
 extern crate diesel_migrations;
 extern crate dotenv;
 #[cfg(test)]
-#[macro_use]
 extern crate matches;
 
 pub mod models;
@@ -74,6 +73,7 @@ pub fn random_quoth(conn: &SqliteConnection, author: Option<i64>) -> QueryResult
 }
 
 #[cfg(test)]
+#[allow(unused_must_use)]
 mod tests {
     use super::*;
     use diesel_migrations::embed_migrations;
