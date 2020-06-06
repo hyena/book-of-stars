@@ -1,4 +1,4 @@
-# Book of Stars
+# Book of Stars (WIP)
 A discord bot to save quotes from your favorite servers and play them back.
 
 ## Usage
@@ -21,7 +21,9 @@ The star emoji is a constant in the src file and can be changed.
   - [ ] Write bot to record quoths
   - [ ] Add bot functionality to query and return quoths
   - [ ] Write utility to load legacy quoths from slack
-  - [ ] Write utility to retrieve pinned messages as quoths
+  - [ ] ~~Write utility to retrieve pinned messages as quoths (Do them via message id)~~ (do this via message snowflake ids instead)
+  - [ ] Functionality to pick your own emojis via `.env`
+  - [ ] Functionality to save quoth via message id
 
 ### History
 This bot is a re-implementation of my original `quoth` bot for slack. That was implemented in Go and used Mongo (ick) for storage. Now we use Rust, a relational database, and connect to Discord. The world is better.
