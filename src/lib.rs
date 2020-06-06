@@ -12,7 +12,8 @@ pub mod schema;
 
 use self::models::*;
 use diesel::prelude::*;
-use diesel::result::{DatabaseErrorKind, DatabaseErrorKind::UniqueViolation, Error::DatabaseError};
+#[cfg(test)]
+use diesel::result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError};
 use diesel::sql_types;
 use diesel::sqlite::SqliteConnection;
 use dotenv::dotenv;
@@ -39,7 +40,7 @@ pub fn add_quoth<'a>(
     starred_by: i64,
     message_id: i64,
     content: &'a str,
-) -> Result<(), DatabaseErrorKind> {
+) -> QueryResult<usize> {
     use schema::quoths;
 
     let new_quoth = NewQuoth {
@@ -50,14 +51,9 @@ pub fn add_quoth<'a>(
         content,
     };
 
-    match diesel::insert_into(quoths::table)
+    diesel::insert_into(quoths::table)
         .values(&new_quoth)
         .execute(conn)
-    {
-        Ok(_) => Ok(()),
-        Err(DatabaseError(UniqueViolation, _)) => Err(UniqueViolation),
-        Err(error) => panic!("Couldn't insert into database {:?}", error),
-    }
 }
 
 pub fn random_quoth(conn: &SqliteConnection, author: Option<i64>) -> QueryResult<Quoth> {
@@ -116,9 +112,9 @@ mod tests {
     fn test_missing() {
         let conn = memory_database_connection();
         add_quoth(&conn, 1, 1, 2, 1, "smells like yeen spirit");
-        assert_eq!(
-            random_quoth(&conn, Some(3)).err().unwrap(),
-            diesel::NotFound
+        assert_matches!(
+            random_quoth(&conn, Some(3)),
+            Err(diesel::NotFound)
         );
     }
 
@@ -128,7 +124,7 @@ mod tests {
         add_quoth(&conn, 1, 1, 2, 1, "smells like yeen spirit");
         assert_matches!(
             add_quoth(&conn, 2, 1, 2, 1, "seize the yeens"),
-            Err(UniqueViolation)
+            Err(DatabaseError(UniqueViolation, _))
         );
     }
 }

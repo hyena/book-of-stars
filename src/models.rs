@@ -2,6 +2,7 @@ use super::schema::quoths;
 
 /// Some fields are Options (nullable) for historic reasons
 #[derive(Queryable)]
+#[derive(Debug)]
 pub struct Quoth {
     pub id: i64,
     pub author: Option<i64>,
