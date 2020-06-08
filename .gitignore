@@ -2,6 +2,7 @@
 Cargo.lock
 quoths.sql
 quotes.json
+user-map.toml
 slack-spychat-members.csv
 
 # Don't save environment to keep passwords secure
