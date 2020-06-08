@@ -28,8 +28,8 @@ pub struct NewQuoth<'a> {
 /// For inserting old messages from before the jump to discord.
 #[derive(Insertable)]
 #[table_name = "quoths"]
-pub struct NewLegacyQuoth<'a> {
+pub struct NewLegacyQuoth {
     pub author: Option<i64>,
-    pub content: &'a str,
     pub legacy_author_fallback: Option<String>,
+    pub content: String,
 }

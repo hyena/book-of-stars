@@ -20,7 +20,7 @@ The star emoji is a constant in the src file and can be changed.
   - [x] Write code to add quoths and query them
   - [ ] Write bot to record quoths
   - [ ] Add bot functionality to query and return quoths
-  - [ ] Write utility to load legacy quoths from slack
+  - [X] Write utility to load legacy quoths from slack
   - [ ] ~~Write utility to retrieve pinned messages as quoths (Do them via message id)~~ (do this via message snowflake ids instead)
   - [ ] Functionality to pick your own emojis via `.env`
   - [ ] Functionality to save quoth via message id

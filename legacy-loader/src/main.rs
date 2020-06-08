@@ -2,11 +2,14 @@
 /// Specifically, an earlier version of this program used Slack and stored quoths in mongodb. Since much of that content is still funny to me, I wanted
 /// a program to copy over the data. This works by writing up a mapping in toml that maps all slack users to either a discord userid or to a legacy name
 /// for people without a discord account.
+extern crate diesel;
 extern crate regex;
 #[macro_use]
 extern crate serde;
 extern crate serde_json;
 
+use diesel::prelude::*;
+use diesel::result::Error;
 use regex::Regex;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -15,6 +18,9 @@ use std::fs::read_to_string;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+
+use stars_lib::models::NewLegacyQuoth;
+use stars_lib::schema::quoths;
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
@@ -25,7 +31,7 @@ enum UserMapping {
 }
 
 #[derive(Deserialize)]
-pub struct LegacyQuoth {
+pub struct SlackQuoth {
     text: String,
     user: String,
 }
@@ -43,19 +49,32 @@ fn main() {
 
 
     let bracket_remover_re = Regex::new(r"<(?P<url>.*?)>").unwrap();
-    if let Ok(lines) = read_lines(quoth_file_path) {
-        // Consumes the iterator, returns an (Optional) String
-        for line in lines {
-            if let Ok(quote) = line {
-                let q: LegacyQuoth = serde_json::from_str(&quote).unwrap();
-                println!("{:?}: {}", user_map.get(&q.user).unwrap(), bracket_remover_re.replace_all(&q.text, "$url"));
-            }
+    let legacy_quoths: Vec<NewLegacyQuoth> = read_lines(quoth_file_path).unwrap().map(|l| {
+        let sq: SlackQuoth = serde_json::from_str(&l.expect("Error reading quote lines")).unwrap();
+        let authorship = user_map.get(&sq.user).unwrap();
+        NewLegacyQuoth {
+            author: match authorship {
+                UserMapping::DiscordUser(id) => Some(*id as i64),
+                UserMapping::LegacyName(_) => None,
+            },
+            legacy_author_fallback: match authorship {
+                UserMapping::DiscordUser(_) => None,
+                UserMapping::LegacyName(name) => Some(name.to_string()),
+            },
+            content: bracket_remover_re.replace_all(&sq.text, "$url").to_string(),
         }
-    }
+    }).collect();
 
     // Load the translated quoths into the database.
     let conn = stars_lib::establish_connection();
-
+    conn.transaction::<(), Error, _>(|| {
+        for lq in legacy_quoths {
+            diesel::insert_into(quoths::table)
+                .values(&lq)
+                .execute(&conn)?;
+        }
+        Ok(())
+    }).expect("Error inserting legacy quoths. Transaction rolled back.");
 }
 
 fn parse_toml_map<P>(filename: P) -> HashMap<String, UserMapping> where P: AsRef<Path> {

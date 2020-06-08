@@ -1,6 +1,6 @@
 /target
 Cargo.lock
-quoths.sql
+quoths.db
 quotes.json
 user-map.toml
 slack-spychat-members.csv
