@@ -1,5 +1,19 @@
+[package]
+name = "book-of-stars"
+version = "0.1.0"
+authors = ["hyena <hyena@users.noreply.github.com>"]
+edition = "2018"
+
 [workspace]
 members = [
+    ".",
     "stars-lib",
     "legacy-loader",
 ]
+default-members = [".", "stars-lib"]
+
+[dependencies]
+diesel = { version = "1.4.4", features = ["sqlite"] }
+dotenv = "0.15.0"
+serenity = "0.8"
+stars-lib = { path = "stars-lib" }

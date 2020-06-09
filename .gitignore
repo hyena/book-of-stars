@@ -4,6 +4,7 @@ quoths.db
 quotes.json
 user-map.toml
 slack-spychat-members.csv
+.vscode
 
 # Don't save environment to keep passwords secure
 .env
