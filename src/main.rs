@@ -55,18 +55,37 @@ impl EventHandler for Handler {}
 }
 
 #[command]
-fn quoth(ctx: &mut Context, msg: &Message) -> CommandResult {
+fn quoth(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     let data = ctx.data.read();
+
+    let quoth_target = match args.remains() {
+        None => None,
+        Some(s) => {
+            if let Some(g) = msg.guild(&ctx) {
+                // First try to find an exact match.
+                if let Some(m) = g.read().member_named(s) {
+                    Some(m.user.read().id.0 as i64)
+                } else {
+                    match g.read().members_starting_with(s, false, false).get(0) {
+                        None => None,
+                        Some(m) => Some(m.user.read().id.0 as i64),
+                    }
+                }
+            } else {
+                None
+            }
+        }
+    };
+
     let conn = data.get::<Conn>().unwrap().lock().unwrap();
-    if let Ok(quoth) = stars_lib::random_quoth(&conn, None) {
+    if let Ok(quoth) = stars_lib::random_quoth(&conn, quoth_target) {
         // This feels like a borrower violence. TODO: Fix it
         let temp;
         let temp2;
-        let temp3;
         let name = if let Some(user_id) = quoth.author {
-            temp = ctx.cache.read().user(user_id as u64);
-            match temp {
-                Some(u) => { temp2 = u; temp3 = temp2.read(); &temp3.name },
+            // temp = ctx.cache.read().user(user_id as u64);
+            match ctx.cache.read().user(user_id as u64) {
+                Some(u) => { temp = u; temp2 = temp.read(); &temp2.name },
                 None => "UNKNOWN",
             }
         } else if let Some(legacy_name) = &quoth.legacy_author_fallback {
@@ -81,10 +100,10 @@ fn quoth(ctx: &mut Context, msg: &Message) -> CommandResult {
             .push(")\n")
             .push(quoth.content)
             .build();
-        msg.channel_id.say(&ctx.http, &response).and(Ok(())).or_else(|e| Err(CommandError::from(e)))
+        msg.channel_id.say(&ctx.http, &response)
     } else {
-        msg.reply(&ctx, "No quoths found. Consider better posting").and(Ok(())).or_else(|e| Err(CommandError::from(e)))
-    }
+        msg.reply(&ctx, "No quoths found. Consider better posting")
+    }.and(Ok(())).or_else(|e| Err(CommandError::from(e)))
 }
 
 /// Add a new quoth into the book of stars. This is a temporary command that should be replaced with a reaction-based approach.
