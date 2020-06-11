@@ -58,18 +58,21 @@ impl EventHandler for Handler {}
 fn quoth(ctx: &mut Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read();
     let conn = data.get::<Conn>().unwrap().lock().unwrap();
-
     if let Ok(quoth) = stars_lib::random_quoth(&conn, None) {
-        // Inefficient String creation here till I learn how to make references live long enough.
+        // This feels like a borrower violence. TODO: Fix it
+        let temp;
+        let temp2;
+        let temp3;
         let name = if let Some(user_id) = quoth.author {
-            match ctx.cache.read().user(user_id as u64) {
-                Some(u) => u.read().name.clone(),
-                None => String::from("UNKNOWN"),
+            temp = ctx.cache.read().user(user_id as u64);
+            match temp {
+                Some(u) => { temp2 = u; temp3 = temp2.read(); &temp3.name },
+                None => "UNKNOWN",
             }
         } else if let Some(legacy_name) = &quoth.legacy_author_fallback {
-            String::from(legacy_name)
+            legacy_name
         } else {
-            String::from("UNKNOWN")
+            "UNKNOWN"
         };
         let response = MessageBuilder::new()
             .push_bold_safe(&name)
