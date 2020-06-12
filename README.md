@@ -24,7 +24,7 @@ The star emoji is a constant in the src file and can be changed.
   - [X] ~~Write utility to retrieve pinned messages as quoths (Do them via message id)~~ (do this via message snowflake ids instead)
   - [ ] Functionality to pick your own emojis via `.env`
   - [X] Functionality to save quoth via message id
-  - [ ] Functionality to delete bad or buggy quoths
+  - [X] Functionality to delete bad or buggy quoths
 
 ### History
 This bot is a re-implementation of my original `quoth` bot for slack. That was implemented in Go and used Mongo (ick) for storage. Now we use Rust, a relational database, and connect to Discord. The world is better.

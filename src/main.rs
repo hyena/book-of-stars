@@ -31,7 +31,7 @@ impl TypeMapKey for Conn {
 }
 
 #[group]
-#[commands(quoth, pen)]  // TODO: !erase, !pen
+#[commands(quoth, pen, erase)]
 struct General;
 
 struct Handler;
@@ -136,6 +136,23 @@ fn pen(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
         }
     } else {
         msg.reply(&ctx, "Invalid argument. Usage: !pen <message id>")
+    }
+    .and(Ok(())).or_else(|e| Err(CommandError::from(e)))
+}
+
+#[command]
+fn erase(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
+    if let Ok(msg_id) = args.single::<u64>() 
+    {
+        let data = &ctx.data.read();
+        let conn = data.get::<Conn>().unwrap().lock().unwrap();
+        match stars_lib::delete_quoth(&conn, msg_id as i64) {
+            Ok(0) => msg.reply(&ctx, format!("{} not found.", msg_id)),
+            Ok(_) => msg.reply(&ctx, "Erased from the book of stars."),
+            Err(e) => msg.reply(&ctx, format!("Unknown error while erasing from the book of stars: {:?}", e))
+        }
+    } else {
+        msg.reply(&ctx, "Invalid argument. Usage: !erase <quoth id>")
     }
     .and(Ok(())).or_else(|e| Err(CommandError::from(e)))
 }
